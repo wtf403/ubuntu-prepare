@@ -1,6 +1,6 @@
-# Ansible playbooks for Ubuntu server
+# Ubuntu server initial setup
 
-This repository contains a set of Ansible playbooks for Ubuntu server initial setup that can be run using [multiselect menu](multiselect.miu.io)
+This repository contains bash scripts fo [multiselect menu](multiselect.miu.io)
 
 ## Requirements
 
@@ -9,11 +9,9 @@ Additionally, for SSH password authentication `sshpass` package required
 
 ## Usage
 
-- Clone the repo:  
-  `git clone https://github.com/wtf403/ubuntu-prepare.git`
-- Set the permissions:
-  `chmod +x main.sh`
-- Run main.sh and provide SSH connection string
-- Some playbooks may also require root user credentials
-
-## Available Playbooks
+- Generate ssh keys if you have't one
+- Clone main script to your local machine:  
+  `wget -qO- \
+    https://raw.githubusercontent.com/wtf403/ubuntu-prepare/main/main.sh | bash`  
+    or  
+    `curl -sL https://raw.githubusercontent.com/wtf403/ubuntu-prepare/main/utils/spinner.sh | bash`
