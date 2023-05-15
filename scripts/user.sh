@@ -10,8 +10,6 @@ function add_user {
   # Add new sudoer
   sudo adduser user "$new_username"
   sudo usermod -aG sudo "$new_username"
-
-  # Add new user
   sudo useradd -m -s /bin/bash "$new_username"
   echo "$new_username:$new_password" | sudo chpasswd -e
 
