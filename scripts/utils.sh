@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
+echo ' ### UTILS.SH ### '
+
 result=()
-utils=("git" "curl" "nvim")
+utils=("git" "curl" "neovim")
 _preselection=("true" "true" "false")
 echo "Select utils to install:"
 multiselect "true" result utils _preselection
@@ -14,7 +16,7 @@ for i in "${!result[@]}"; do
   fi
 done
 
-read -r "Enter user on ${sshstr:?} to install utils: " user
+read -rp "Enter user on ${sshstr:?} to install utils: " user
 
 # shellcheck disable=SC2087
 ssh -o "User=$user" "${sshstr:?}" 'bash -s' <<-EOF

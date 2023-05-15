@@ -1,32 +1,53 @@
 #!/usr/bin/env bash
 
-#shellcheck source=/dev/null
-source <(wget -qO- https://raw.githubusercontent.com/wtf403/ubuntu-prepare/main/utils/spinner.sh)
+echo ' ### USER.SH ### '
 
-read -rp "Enter new user name: " new_username
-read -rp "Enter new user password: " -s new_password
+while true; do
+  read -rp "Enter new user name: " new_username
+  while true; do
+    read -rp "Enter new user password: " new_password
+    printf "\n"
+    if [[ $new_password =~ \  ]]; then
+      pritnf "Error: Password should not contain spaces! \n"
+    else
+      break
+    fi
+  done
+
+  read -rp "Repeat new user password: " new_password_repeat
+  printf "\n"
+  if [[ "$new_password" != "$new_password_repeat" ]]; then
+    printf "Error: Passwords do not match! \n"
+  else
+    break
+  fi
+done
 
 function add_user {
+  local new_username="$1"
+  local new_password="$2"
   # Add new sudoer
-  sudo adduser user "$new_username"
+  sudo adduser --disabled-password --gecos "" "$new_username"
   sudo usermod -aG sudo "$new_username"
-  sudo useradd -m -s /bin/bash "$new_username"
+  sudo usermod -s /bin/bash "$new_username"
   echo "$new_username:$new_password" | sudo chpasswd -e
 
   sudo systemctl restart sshd
 }
 
+echo "Connecting to ${sshstr:?}..."
+
 # shellcheck disable=SC2154
 ssh "$sshstr" 'bash -s' < <(
   typeset -f add_user
-  echo "add_user"
+  echo "add_user ${new_username} ${new_password}"
 )
 
-function copy_ssh_key {
-  ssh_key_path="$HOME/.ssh/id_rsa.pub"
+ssh_key_path="$HOME/.ssh/id_rsa.pub"
 
+function copy_ssh_key {
   check_key_path() {
-    read -rp "Is path to ssh keys correct ($ssh_key_path)? [Y/n] " correct
+    read -rp "Is path to ssh keys correct ($ssh_key_path)? [Y/n]" correct
     if [[ $correct == '' || $correct == 'y' || $correct == 'Y' ]]; then
       test -f "$ssh_key_path" && return 0 || return 1
     elif [[ $correct == 'n' || $correct == 'N' ]]; then
@@ -40,9 +61,9 @@ function copy_ssh_key {
 
   read -rp "Do you want to copy ssh keys to remote? [Y/n] " flag
   if [[ $flag == '' || $flag == 'y' || $flag == 'Y' ]]; then
-    check_key_path && ssh-add "$ssh_key_path" && return 0 || return 1
+    check_key_path && ssh-copy-id -o User="$new_username" -i "$ssh_key_path" "$sshstr" && return 0 || return 1
   elif [[ $flag == 'n' || $flag == 'N' ]]; then
-    echo "You can copy ssh keys later by running 'ssh-copy-id -i <path_to_ssh_key> $new_username'"
+    echo "You can copy ssh keys later by running 'ssh-copy-id -o User=$new_username -i <path_to_ssh_key> $sshstr'"
     return 1
   else
     echo "Error: invalid answer"

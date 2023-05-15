@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+echo ' ### NGINX.SH ### '
+
 function install_nginx() {
   # Install dependencies
   update-rc.d sendmail disable
